@@ -1,0 +1,123 @@
+---
+title: "Icecream Consumption and the Effect of Temperature"
+author: "Amanda Waldron"
+date: "5/24/2020"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+---
+
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Project Description
+
+Hypothesis: Icecream consumption will increase as the temperature increases. In other words icecream consumption is dependent on temperature. We can predict icecream consumption from temperature.
+
+The variables being used that will be explored in this data set are icecream consumption rate and temperature.
+
+The statistical analysis that will be used is a Linear Regression.
+
+```{r,include= FALSE,echo=FALSE}
+library(DescTools)
+library(psych)
+library(dplyr)
+library(ggplot2)
+library(jtools)
+library(lmtest)
+library(xtable)
+library(tidyr)
+```
+
+
+```{r,include= FALSE,echo=FALSE}
+Icecream.data <- read.csv("Icecream.csv")
+```
+
+
+```{r,echo= FALSE,include=FALSE}
+Icecream.data
+Icecream.data$cons %>% unique()
+Icecream.data$temp %>% unique()
+Icecream.data$price %>% unique()
+Icecream.data$income %>% unique()
+class(Icecream.data$cons)
+class(Icecream.data$temp)
+```
+
+# Exploring the Data
+
+## Descriptives
+
+```{r,echo=FALSE,include=FALSE}
+Icecream.data <- Icecream.data %>% mutate(temp.groups = ifelse(temp < 40,"low",
+                                              ifelse(temp >= 40 & temp < 50,"medium",
+                                                     "high")))
+
+my.desctbl <-Icecream.data %>% group_by(temp.groups) %>%
+  summarize(Mean.cons = mean(cons, na.rm = TRUE),
+            SD.cons = sd(cons, na.rm = TRUE),
+            Mean.temp = mean(temp, na.rm = TRUE),
+            SD.temp = sd(temp, na.rm = TRUE))
+
+my.desctbl
+```
+
+```{r, results= "asis",echo=FALSE}
+Icecream.data.table <- xtable(my.desctbl, caption = "Icecream Desc Table",
+                                align = "lccccc", digits = 6)
+
+print.xtable(Icecream.data.table, caption.placement= "top")
+```
+## Visualization
+
+```{r,echo=FALSE}
+Icecream.bar <- ggplot(Icecream.data, aes(x = temp, y = cons, fill = temp))+
+  geom_bar(stat = "summary", fun.y = "mean")+
+  labs(title= "Icecream Consumption & Temperature Bar Graph", x = "Temperature", y = "Icecream Consumption")+
+  theme_apa()
+  
+Icecream.bar
+```
+
+# Results
+
+## Hypothesis
+
+We expect that as temperature increase that the consumption of icecream will increase. In essence we expect that temperature will predict icecream consumption.Therefore, as the temperature increases, the icecream consumption will increase too. We expect that the relationship between these variables will be strong possibly between an 60-80% effect size. I expect this relationship because as temperatures rise, there tends to be an increase in people outside and icecream trucks and vendors all around. Icecream is always stocked but in the higher temperatures, people want to cool down with something cold such as icecream. When it is 20 degrees, you are much less likely to see someone standing outside eating an icecream cone. It is not impossible but it is not as common as when it is warmer outside. Therefore, we expect this relationship because higher temperatures and a cold dessert to cool down makes perfect sense and are most definitely related. Also, these are continous variables in that as one variable increases in number so does the other, in other words we expect a linear trend and even our bar graph is demonstrating that trend in the visualization section. We can clearly see that as temperature increases, there appears to be an increase in icecream consumption in the bar graph but of course that will be tested by our regression analysis.
+
+## Analyses
+
+```{r, results="asis", echo= FALSE}
+my.reg <- lm(cons ~ temp, Icecream.data)
+#my.reg %>% summ(confint = TRUE,digits = 4)
+Icecream.data %>% select(cons) %>% range
+Icecream.regtable <- xtable(my.reg, caption = "Icecream Consumption Regression Table",
+                                align = "lcccc", digits = 4)
+
+print.xtable(Icecream.regtable, caption.placement= "top")
+```
+
+The findings from our Linear Regression analysis were that the results support our hypothesis that as temperature increases so does icecream consumption. Overall we can conclude that we can predict icecream consumption from temperature,F(1,28) = 42.28, p < .01. The p-value represents the probability of observing a relationship between temperature and icecream consumption amount this large or larger just due to sampling variability if the null were true. The p values were also significant and all the other data supports that finding. The percentage of the variability of the icecream consumption explained by temperature is 0.60% or 60%. For the sake of predicting icecream consumption from temperature, this can be considered a medium effect size which is a good finding for supporting our hypothesis.The slope(0.0031) also tells us the slope of the line and tells us the rate of change of y relative to x in other words when the temperature is 0.0031 then the amount of icecream consumed(in pints) is 0.2069.The confidence level for the intercept(0.1563 & 0.2575) includes the intercept=icecream consumption estimate(0.2069) which supports our hypothesis that our data captures the true population since our estimate falls in between that CI level and does not include 0.The confidence level for temperature(0.0021 & 0.0041) also includes the estimate for temperature(0.0031) which again does not include 0 thus it also captures the true population values. Thus resulting in us concluding that icecream consumption does increase as the temperature increases therefore us supporting our hypothesis.
+
+
+```{r, echo= FALSE}
+ggplot(my.reg, aes(x = temp, y = cons)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  geom_point(colour = "purple", size = 1, position = "jitter")+
+  labs(title = "Icecream Consumption & Temperature Plot", x= "Temperature", y = "Icecream Consumption")+
+  theme_apa()
+```
+
+This scatterplot represents the relationship between temperature and icecream consumption. The x-axis represents temperature and the y-axis represents icecream consumption or simply the amount of icecream consumed(in pints). Essentially the differing temperatures are on the x axis that  coincides with the y-axis which is displaying the amount of icecream consumed throughout differing temperatures as the temperature increases. This shows that for the most part, the higher the temperature is that, the more pints of icecream is consumed. There is a general linear trend(or technically quadratic) being displayed here which also supports the relationship we expected to see and did see from our linear regression model being plotted here.
+
+# Project Summary
+
+To reiterate our hypothesis, we expected that as temperature increases that icecream consumption will increase. Therefore, we expected that we can predict icecream consumption from temperature thus appropriately we used a regression analysis to test this hypothesis. The results of the test supported our hypothesis with an effect size of 60% which is considerably high meaning that 60% of icecream consumption is explained by temperature. Although this also means that 40% remains unexplained. There is still a fair amount of support for our hypothesis that as temperature increases so does icecream consumption. According to our graph, there is definitely a linear (or  even quadratic as we saw with the loess command) trend being seen as the temperature increases so does the icecream consumption. Therefore, we concluded that as temperature increases so does icecream consumption as a result.
+
+
+
