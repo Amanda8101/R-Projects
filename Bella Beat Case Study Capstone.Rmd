@@ -1,0 +1,149 @@
+---
+title: "Bella Beat Case Study Capstone by: Amanda Waldron"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Loading up data and packages
+
+```{r}
+library(jtools)
+library(xtable)
+library(dplyr)
+library(tidyverse)
+```
+
+
+```{r}
+daily_activity <- read.csv("dailyActivity_merged.csv")
+```
+
+We'll create another dataframe for the sleep data. 
+```{r}
+sleep_day <- read.csv("sleepDay_merged.csv")
+```
+
+## Exploring a few key tables
+
+Take a look at the daily_activity data.
+```{r}
+head(daily_activity)
+```
+
+Identify all the columsn in the daily_activity data.
+```{r}
+colnames(daily_activity)
+```
+
+Take a look at the sleep_day data.
+```{r}
+head(sleep_day)
+```
+
+Identify all the columns in the daily_activity data.
+```{r}
+colnames(sleep_day)
+```
+
+Note that both datasets have the 'Id' field - this can be used to merge the datasets.
+
+## Understanding some summary statistics
+How many unique participants are there in each dataframe? It looks like there may be more participants in the daily activity dataset than the sleep dataset.
+
+```{r distinct users}
+n_distinct(daily_activity$Id)
+n_distinct(sleep_day$Id)
+```
+
+How many observations are there in each dataframe?
+```{r observations}
+nrow(daily_activity)
+nrow(sleep_day)
+```
+
+Statistical Summary - For the daily activity dataframe:
+```{r}
+daily_activity %>%  
+  select(TotalSteps,
+         TotalDistance,
+         SedentaryMinutes) %>%
+  summary()
+```
+
+Statistical Summary - For the sleep dataframe:
+```{r}
+sleep_day %>%  
+  select(TotalSleepRecords,
+  TotalMinutesAsleep,
+  TotalTimeInBed) %>%
+  summary()
+```
+
+What does this tell us about how this sample of people's activities? 
+
+## Plotting a few explorations
+
+
+```{r}
+ggplot(data=daily_activity, aes(x=TotalSteps, y=SedentaryMinutes)) + geom_point()
+```
+
+
+There is a negative correlation, thus a negateive relationship between steps taken in a day and sedentary minutes. It looks like the higher sedentary minutes a person, lesser steps are taken. This can help inform the customer segments we can market to by marketing to people as a way to get more steps in. The new device can encourage them similar to an apple watch where it reminds you to stand up but take it a step further and remind the person that it is time to move as you have been sitting for "x" amount of time hence the sedentary minutes that are being calculated. 
+
+
+
+```{r}
+ggplot(data=sleep_day, aes(x=TotalMinutesAsleep, y=TotalTimeInBed)) + geom_point()
+```
+
+There is a positive correlation with some outliers. It is mostly linear with somepeople appearing to spend a lot of time in bed but not so much sleeping.
+
+These trends indicate that the product might need to put more energy into marketing sleep hygiene and its relationship to the users health.
+
+
+## Merging these two datasets together
+
+```{r}
+combined_data <- merge(sleep_day, daily_activity, by="Id")
+```
+
+Take a look at how many participants are in this data set.
+
+```{r}
+n_distinct(combined_data$Id)
+```
+
+Note that there were more participant Ids in the daily activity dataset that have been filtered out using merge.  
+
+Activity and Sleep 
+```{r}
+ggplot(data=combined_data, aes(x=TotalMinutesAsleep, y=TotalSteps)) + geom_point() +
+  geom_smooth(method = "lm")
+```
+I was hoping to find a clear and strong relationship that indicates that participants who sleep more also take more steps or fewer steps per day. I am not finding a clear relationship between the two. This indicates to me that Bella Beat should really zero in on sleeping data and activity during the day. If we can get more information collected on this then I think a relationship between the two can be found. Sleep is important for health and that includes having energy to sustain you throughout the day. Also activity throughout the day usually helps a person sleep better. My point is to say the data here is not supporting this but I am sure if Bella Beat has better tracking on this information then that relationship will be supported and shown in their data. Therefore, marketing should focus on a product that has advanced tracking of sleep and acitivity so that we can see the relationship between the two in the average person and in turn help the person see these things themselves and track their own behaviors.
+
+```{r}
+
+
+
+
+calories_day <- read.csv("dailyCalories_merged.csv")
+
+calories_day %>% head()
+
+
+
+combined_data2 <- merge(daily_activity, calories_day, by= "Id")
+```
+
+
+```{r}
+
+ggplot(data=combined_data2, aes(x=TotalSteps, y=Calories.x)) +
+         geom_point()
+    
+```
+
+There seems to be positive relationship between total steps taken and calories but it is not strong. This indicates that they can probably build upon this such as calories burned, intake, and activity throughout the day to support a healthy lifestyle. I am sure with further exploration that the data can tell us more but so far it is clear to me that marketing can focus on digging deeper into total steps a person takes per day and calories taken in and bruned along with sleep and activity data. This will help optimize their usefulness to the average person who wants to track these things, lead a healthier lifestyle and be able to see the relationships in their day to day to know what they themselves can work on as an individual which means we have to provide the ability to get more detailed data that allows this.
